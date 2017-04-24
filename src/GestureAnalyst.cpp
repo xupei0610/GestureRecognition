@@ -1,5 +1,6 @@
 #include "GestureAnalyst.h"
 
+
 GestureAnalyst::GestureAnalyst()
 {
     caffe::Caffe::set_mode(caffe::Caffe::CAFFE_WORK_MODE);
@@ -7,28 +8,31 @@ GestureAnalyst::GestureAnalyst()
 
 int GestureAnalyst::load(const QString &model_file, const QString &network_structure)
 {
-    std::string network_file("/Users/XP//Documents/Src/HandRecognitionML/data/sample64/lenet.prototxt");
-    _net.reset(new caffe::Net<float>(network_file, caffe::TEST));
+    caffe::NetParameter param;
+
+    QFile file(":/lenet.prototxt");
 
 
+    auto a = QTemporaryFile::createNativeFile(file);
 
-    //    caffe::NetParameter param;
+    if (!a->open())
+        return -1;
+    int fd = a->handle();
 
-    //    caffe::ReadProtoFromTextFile(param_file, &param);
+    google::protobuf::io::FileInputStream* input = new google::protobuf::io::FileInputStream(fd);
+    bool success = google::protobuf::TextFormat::Parse(input, &param);
 
-    //    int fd = open(filename, O_RDONLY);
-    //      CHECK_NE(fd, -1) << "File not found: " << filename;
-    //      FileInputStream* input = new FileInputStream(fd);
-    //      bool success = google::protobuf::TextFormat::Parse(input, proto);
-    //      delete input;
-    //      close(fd);
+//    caffe::ReadProtoFromTextFile(param_file, &param);
 
-    //    param.mutable_state()->set_phase(caffe::TEST);
-    //    param.mutable_state()->set_level(0);
-
+    // Set phase, stages and level
+    int level = 0;
+    caffe::Phase phase = caffe::TEST;
+    param.mutable_state()->set_phase(phase);
+    param.mutable_state()->set_level(level);
 
 
-
+//    _net.reset(new caffe::Net<float>(network_file, caffe::TEST));
+    _net.reset(new caffe::Net<float>(param));
     _net->CopyTrainedLayersFrom(model_file.toStdString());
     if (_net->num_inputs() != 1)
         //        return ERROR_INPUT_LAYER_NUM;

@@ -51,7 +51,7 @@ void MainView::_setupUi()
 {
     _ui_btn_controlling = new QPushButton;
     _ui_btn_sampling = new QPushButton;
-    _ui_btn_setting = new QPushButton;
+    _ui_btn_setting = new QPushButton(tr("Settings"));
 
     _ui_btn_controlling->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     _ui_btn_controlling->setAutoDefault(false);

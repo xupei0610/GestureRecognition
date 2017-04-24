@@ -189,12 +189,25 @@ public:
     /**
      * @brief hand_center is the estimated position of hand center. This is a reference to #HandDetector::_hand_center .
      *
-     * The current estimation scheme is qutie simple. We estimate it as the gravity center of the contour region.
+     * The current estimation scheme is qutie simple. We estimate it as the gravity center of the contour region. It should be very close to the result obtained by distance transformation.
      *
      * @see #HandDetector::_hand_center
      * @see #HandDetector::detect
      */
     const cv::Point &hand_center;
+    /**
+     * @brief palm_radius is estimated radius of palm. This is a reference to #HandDetector::_palm_radius .
+     *
+     * @see #HandDetector::_palm_radius
+     * @see #HandDetector::detect
+     */
+    const double &palm_radius;
+    /**
+     * @brief waitting_bg is a indicator if the system is waitting for setting the background image for the brackground subtractor.
+     *
+     * @see #HandDetector::_bg_subtractor
+     */
+    const bool &waitting_bg;
 
     explicit HandDetector(QObject *parent = 0);
     /**
@@ -211,6 +224,7 @@ public:
      *  - #HandDetector::tracked_point
      *  - #HandDetector::fingers
      *  - #HandDetector::hand_center
+     *  - #HandDetector::palm_radius
      *
      * @param input_img : an image
      * @retval true : if detect something
@@ -229,6 +243,7 @@ signals:
      *
      * @see #HandDetector::setBackgroundImage
      * @see #HandDetector::backgroundImageCleared
+     * @see #HandDetector::waiting_bg
      */
     void backgroundImageSet();
     /**
@@ -342,8 +357,15 @@ protected:
      */
     cv::Point _hand_center;
     /**
+     * @brief _palm_radius is the estimation of palm radius.
+     *
+     * @see #HandDetector::palm_radius
+     */
+    double _palm_radius;
+    /**
      * @brief _bg_subtractor is the background subtractor used.
      *
+     * @see #HandDetector::waitting_bg
      * @see #HandDetector::setBackgroundImage
      * @see #HandDetector::clearBackgroundImage
      */
@@ -353,6 +375,7 @@ private:
     cv::Mat _background_img; // a copy of the initial background image
     cv::Mat _bg; // used as the mask for subtractor
     bool _has_set_bg;
+    bool _waitting_bg;
 
     cv::Scalar _skin_color_lower_bound;
     cv::Scalar _skin_color_upper_bound;

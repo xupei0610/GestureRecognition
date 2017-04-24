@@ -99,6 +99,7 @@ void CommandInputter::input(const int &label_index,
 #endif
     auto cursor_pos = estimateCursorPos(tracked_pos_x*screen_width, tracked_pos_y*screen_height);
     int indx = _mouse_map.indexOf(label_index);
+
     if (indx > -1)
         makeMouseAction(static_cast<MOUSE_KEYBOARD_ACTION>(indx^0xFF), cursor_pos);
     else makeKeyboardAction(label_index);

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>lenet.prototxt</file>
+    </qresource>
+</RCC>

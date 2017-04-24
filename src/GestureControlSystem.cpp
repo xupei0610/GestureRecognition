@@ -19,7 +19,7 @@ GestureControlSystem::GestureControlSystem(HandDetector *hand_detector, SampleCo
     _settings(Settings::getInstance()),
     _camera(new cv::VideoCapture)
 {
-    //connect(main_view, SIGNAL(mainViewClosing())
+    connect(main_view, SIGNAL(mainViewClosing()), this, SLOT(windowClosing()));
     connect(main_view, SIGNAL(settingWindowRequest()), this, SLOT(openSettingWindow()));
     connect(main_view, SIGNAL(controllingWindowRequest()), this, SLOT(openControllingWindow()));
     connect(main_view, SIGNAL(samplingWindowRequest()), this, SLOT(openSamplingWindow()));
@@ -256,6 +256,7 @@ void GestureControlSystem::startControllingTask(const QString &model_file, const
             return;
         }
         int num_labels = _gesture_analyst->load(model_file,"");
+
         if (num_labels == _command_inputter->labels().size())
         {
             _work_status = STATUS_CONTROLLING;
@@ -276,6 +277,13 @@ void GestureControlSystem::stopControllingTask()
     emit controllingTaskStopped();
 }
 
+void GestureControlSystem::windowClosing()
+{
+    tracking_view->close();
+    monitor_view->close();
+    setting_view->close();
+}
+
 void GestureControlSystem::_handleCameraError()
 {
     _camera_capture_timer->stop();
@@ -286,7 +294,7 @@ void GestureControlSystem::_handleCameraError()
 void GestureControlSystem::_processCapturedFrame(cv::Mat &captured_frame)
 {
     bool detected = false;
-    if (monitor_view->isVisible() || _work_status == STATUS_CONTROLLING || _work_status == STATUS_SAMPLING)
+    if (monitor_view->isVisible() || _hand_detector->waitting_bg || _work_status == STATUS_CONTROLLING || _work_status == STATUS_SAMPLING)
     {
         detected = _hand_detector->detect(captured_frame(_roi));
 
@@ -300,6 +308,7 @@ void GestureControlSystem::_processCapturedFrame(cv::Mat &captured_frame)
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img)
+//                                ImgConvertor::cvMat2QPixmap(_hand_detector->extracted_img)
                                 );
 
             }
@@ -307,10 +316,12 @@ void GestureControlSystem::_processCapturedFrame(cv::Mat &captured_frame)
             {
                 if (_work_status == STATUS_SAMPLING && !_sample_collector->deny())
                     _sample(_hand_detector->extracted_img);
+
                 if (monitor_view->isVisible())
                     monitor_view->updateMonitorImage3(
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
+//                                ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img),
                                 ImgConvertor::cvMat2QPixmap(_hand_detector->extracted_img)
                                 );
             }
@@ -401,6 +412,7 @@ void GestureControlSystem::_samplingCompleted()
 void GestureControlSystem::_recognize(const cv::Mat &image, const cv::Point &tracked_point)
 {
     auto res = _gesture_analyst->analyze(_sample_collector->resizeSample(image), 5);
+
     _command_inputter->input(res[0].label_id,
             static_cast<float>(tracked_point.x-DEFAULT_ROI_MARGIN_LEFT)/_cursor_roi.width,
             static_cast<float>(tracked_point.y-DEFAULT_ROI_MARGIN_TOP)/_cursor_roi.height);
@@ -412,6 +424,7 @@ void GestureControlSystem::_recognize(const cv::Mat &image, const cv::Point &tra
     }
     monitor_view->setMsg(msg.join("\n"));
 }
+
 void GestureControlSystem::_handleControllingError(const CONTROLLING_ERROR &e)
 {
     if (e == CONTROLLING_ERROR_ILLEGAL_KEYMAP_FILE)

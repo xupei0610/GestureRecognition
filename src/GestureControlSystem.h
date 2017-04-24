@@ -235,6 +235,11 @@ public slots:
      */
     virtual void stopControllingTask();
 
+    /**
+     * @brief windowClosing is the callback function before the main window is closed.
+     */
+    void windowClosing();
+
 protected:
     /**
      * @brief _hand_detector is the #HandDetector used by this instance.

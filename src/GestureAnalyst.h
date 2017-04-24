@@ -10,7 +10,14 @@
 #include "global.h"
 
 #include <QObject>
+#include <QDebug>
 #include <caffe/caffe.hpp>
+
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/text_format.h>
+#include <QFile>
+#include <QTemporaryFile>
+#include <QDebug>
 
 /**
  * @brief The GestureAnalyst class is an implementation of the gesture analyst based on CNN and MNIST network structure.
@@ -49,6 +56,7 @@ protected:
      * @brief _num_of_channels is the number of channels of input image.
      */
     const int _num_of_channels = 1;
+
 };
 
 #endif // GESTUREANALYST_H

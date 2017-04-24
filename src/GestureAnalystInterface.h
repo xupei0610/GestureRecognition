@@ -29,8 +29,8 @@ public:
         /**
          * @brief prob is the probability by which the target belongs to the label.
          */
-        int prob;
-        Prediction(const int &label_id, const int &prob) : label_id(label_id), prob(prob) {}
+        double prob;
+        Prediction(const int &label_id, const double &prob) : label_id(label_id), prob(prob) {}
     };
 
     /**

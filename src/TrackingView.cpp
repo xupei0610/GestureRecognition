@@ -166,7 +166,7 @@ void TrackingView::controllingTaskStopped()
     if (_work_status != STATUS_WAITING_CAMERA)
     {
         _work_status = STATUS_IDLE;
-        _ui_btn_start->setText(tr("Track"));
+        _ui_btn_start->setText(tr("Control"));
     }
 }
 

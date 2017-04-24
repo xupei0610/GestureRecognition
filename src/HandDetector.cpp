@@ -21,8 +21,11 @@ HandDetector::HandDetector(QObject *parent) :
     tracked_point(_tracked_point),
     fingers(_fingers),
     hand_center(_hand_center),
+    palm_radius(_palm_radius),
+    waitting_bg(_waitting_bg),
     _bg_subtractor(cv::createBackgroundSubtractorMOG2(1, 16, false)),
     _has_set_bg(false),
+    _waitting_bg(false),
     _skin_color_lower_bound(cv::Scalar(DEFAULT_SKIN_COLOR_MIN_H, DEFAULT_SKIN_COLOR_MIN_S, DEFAULT_SKIN_COLOR_MIN_V)),
     _skin_color_upper_bound(cv::Scalar(DEFAULT_SKIN_COLOR_MAX_H, DEFAULT_SKIN_COLOR_MAX_S, DEFAULT_SKIN_COLOR_MAX_V)),
     _gaussian_size(cv::Size(7,7)),
@@ -64,22 +67,27 @@ void HandDetector::setBackgroundImage()
 {
     if (_interesting_img.empty())
         clearBackgroundImage();
-    return;
-    _bg_subtractor->apply(_interesting_img, _bg, 1);
-    _has_set_bg = true;
-    _interesting_img.copyTo(_background_img);
-    emit backgroundImageSet();
+    _waitting_bg = true;
 }
 
 void HandDetector::clearBackgroundImage()
 {
     _has_set_bg = false;
+    _waitting_bg = false;
     emit backgroundImageCleared();
 }
 
 void HandDetector::_imagePreprocessing()
 {
     // background subtractor
+    if (_waitting_bg == true)
+    {
+        _bg_subtractor->apply(_interesting_img, _bg, 1);
+        _has_set_bg = true;
+        _waitting_bg = false;
+        _interesting_img.copyTo(_background_img);
+        emit backgroundImageSet();
+    }
     if (_has_set_bg == true)
     {
         _bg_subtractor->apply(_interesting_img, _bg, 0);
@@ -113,6 +121,9 @@ bool HandDetector::_fingerExtraction()
     _fingers.clear();
     _tracked_point.x = -1;
     _tracked_point.y = -1;
+//    _hand_center.x = -1;
+//    _hand_center.y = -1;
+//    _palm_radius = 0;
 
     // contour extraction
     cv::findContours(_filtered_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -133,11 +144,11 @@ bool HandDetector::_fingerExtraction()
     std::vector<cv::Point> contour;
     std::vector<std::vector<int> > hulls(1);
     std::vector<cv::Vec4i> defects;
+    std::vector<int> farthest_points;
     double dist1, dist2, angle;
     bool flag1, flag2;
 
     cv::Rect hand_bound = cv::boundingRect(contours[indx]);
-    _filtered_img(hand_bound).copyTo(_extracted_img);
 
     // approximate contour region using polygon
     cv::approxPolyDP(contours[indx], contour, 10.0, true);
@@ -198,15 +209,33 @@ bool HandDetector::_fingerExtraction()
             }
             else
                 _fingers.push_back(contour[d[0]]);
+            farthest_points.push_back(d[2]);
         }
         else if (flag2)
+        {
             _fingers.push_back(contour[d[1]]);
+            farthest_points.push_back(d[2]);
+        }
     }
 
     // estimate hand center via gravity
     auto mom = cv::moments(contour, true);
     _hand_center.x = mom.m10/mom.m00;
     _hand_center.y = mom.m01/mom.m00;
+
+    // estimate palm radius
+//    _palm_radius = 100000000;
+//    for (const auto & i : farthest_points)
+//    {
+//        dist1 = _squaredEuclidDist<cv::Point, cv::Point>(contour[i], _hand_center);
+//        if (dist1 < _palm_radius)
+//            _palm_radius = std::move(dist1);
+//    }
+//    _palm_radius = 1.2*std::sqrt(_palm_radius);
+//    int new_height = _hand_center.y-hand_bound.y + 1.5*_palm_radius;
+
+//    if (new_height < hand_bound.height)
+//        hand_bound.height = std::move(new_height);
 
     // we always use the top most point as the track point
     //    if (_fingers.empty())
@@ -224,6 +253,19 @@ bool HandDetector::_fingerExtraction()
     //            return lhs.y < rhs.y;
     //        });
 
+
+
+    //    cv::Mat _dist_img(_convexity_img.rows, _convexity_img.cols, CV_8UC1);
+    //    cv::drawContours(_dist_img, contours, indx, cv::Scalar(255), -1);
+    //    cv::distanceTransform(_dist_img, _dist_img, CV_DIST_L2, 3);
+
+    //    cv::Point palm_center;
+    //    cv::Point _;
+    //    double min,max;
+
+    //    cv::minMaxLoc(_dist_img, &min, &max, &_, &palm_center);
+
+
     cv::drawContours(_convexity_img, contours, indx, HandDetector::COLOR_GRAY, -1);
     for (const auto & p : _fingers)
     {
@@ -232,7 +274,11 @@ bool HandDetector::_fingerExtraction()
     }
     cv::rectangle(_convexity_img, hand_bound, HandDetector::COLOR_GREEN, 2);
     cv::circle(_convexity_img, _hand_center, 10, HandDetector::COLOR_RED, -1);
+    //    cv::circle(_convexity_img, palm_center, 10, HandDetector::COLOR_GREEN, -1);
+    cv::circle(_convexity_img, _hand_center, _palm_radius, HandDetector::COLOR_RED, 10);
 
+
+    _filtered_img(hand_bound).copyTo(_extracted_img);
     return true;
 }
 

@@ -78,3 +78,6 @@ LIBS += -L/Users/XP/Downloads/caffe-master/build/lib -lcaffe
 
 
 LIBS += -framework ApplicationServices
+
+RESOURCES += \
+    data/qrc.qrc
