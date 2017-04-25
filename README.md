@@ -1,9 +1,8 @@
 # GestureRecognition
-Gesture Recognition System based on Machine Learning
+A Real-Time Gesture Recognition and Human-Computer Interaction System based on Machine Learning
 
-Now this application only supports Mac OS.
+Paper:
+https://arxiv.org/abs/1704.07296
 
-The support to Windows and Linux and the detailed description about this application are expected to be updated around April 24th.
-
-A demo can be found at Youtube.
-[https://youtu.be/4n9F7iJJ2TY](https://youtu.be/4n9F7iJJ2TY)
+Demo:
+https://youtu.be/4n9F7iJJ2TY
