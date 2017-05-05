@@ -35,7 +35,7 @@ Run doxygen at the folder `doc`.
 
 Model
 -----
-Three trained models using the image sizes of 128x128, 64x64 and 32x32 are provided in the `data` folder.  For each size, we collected 19,852 samples of 16 kinds of gestures by ourselves. They can be found at the `samples` folder. All of the samples are in `PGM` format. The training log of the three models can be found at the `log` folder. The network structure is defined by `lenet.prototxt` at the folder `data`. We suggest to use the model with size 64x64. If you want to use other size but not 64x64, you need to modify `SAMPLE_SIZE_WIDTH` and `SAMPLE_SIZE_HEIGHT` in `global.h` or specify the values for them when compiling.
+A trained models using the image sizes of 64x64 is provided in the `data` folder.  We trained three models using images of 128x128, 64x64 and 32x32. For each size, we collected 19,852 samples of 16 kinds of gestures by ourselves. They can be found at the `samples` folder. All of the samples are in `PGM` format. The training log of the three models can be found at the `log` folder. The network structure is defined by `lenet.prototxt` at the folder `data`. We suggest to use the model with size 64x64. If you want to use other size but not 64x64, you need to modify `SAMPLE_SIZE_WIDTH` and `SAMPLE_SIZE_HEIGHT` in `global.h` or specify the values for them when compiling, and you need to train the model yourself.
 
 Configuration File
 ------------------
