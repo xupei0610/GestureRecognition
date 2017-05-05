@@ -1,9 +1,9 @@
 A Real-time Gesture Recognition and Human-Computer Interaction System
 ======================================================================
 
-This system is developed for the course CSci 5561 Computer Vision at Spring 2017.
+This system is originally developed as my course project for computer vision.
 
-This system mainly uses a modified LetNet-5 to recognize gestures, and call the operating system API to post keyboard and mouse events according to the recognition results.
+This system mainly uses a modified LetNet-5 to recognize gestures, and call the operating system API to post keyboard and mouse events (which means that it can run in background) according to the recognition results.
 
 A detailed introduction to this system can be found at https://arxiv.org/abs/1704.07296.
 
