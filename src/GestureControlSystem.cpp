@@ -255,7 +255,7 @@ void GestureControlSystem::startControllingTask(const QString &model_file, const
             _handleControllingError(CONTROLLING_ERROR_ILLEGAL_KEYMAP_FILE);
             return;
         }
-        int num_labels = _gesture_analyst->load(model_file,"");
+        int num_labels = _gesture_analyst->load(model_file);
 
         if (num_labels == _command_inputter->labels().size())
         {
@@ -302,28 +302,12 @@ void GestureControlSystem::_processCapturedFrame(cv::Mat &captured_frame)
         {
             if (_work_status == STATUS_CONTROLLING)
             {
-                _recognize(_hand_detector->extracted_img, _hand_detector->tracked_point);
-                if (monitor_view->isVisible())
-                    monitor_view->updateMonitorImage3(
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img)
-//                                ImgConvertor::cvMat2QPixmap(_hand_detector->extracted_img)
-                                );
-
+                _recognize(_sample_collector->resizeSample(_hand_detector->extracted_img), _hand_detector->tracked_point);
             }
             else
             {
                 if (_work_status == STATUS_SAMPLING && !_sample_collector->deny())
                     _sample(_hand_detector->extracted_img);
-
-                if (monitor_view->isVisible())
-                    monitor_view->updateMonitorImage3(
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
-//                                ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img),
-                                ImgConvertor::cvMat2QPixmap(_hand_detector->extracted_img)
-                                );
             }
         }
         else
@@ -334,10 +318,21 @@ void GestureControlSystem::_processCapturedFrame(cv::Mat &captured_frame)
                     tracking_view->appendText(tr("[Error] Sampling failed. Nothing detected."));
 
             }
-            if (monitor_view->isVisible())
+        }
+        if (monitor_view->isVisible())
+        {
+            if (_hand_detector->extracted_img.empty())
                 monitor_view->updateMonitorImage2(
-                            ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
-                            ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img)
+                            ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
+                            ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img)
+                            );
+            else
+                monitor_view->updateMonitorImage3(
+                            // ImgConvertor::cvMat2QPixmap(_hand_detector->interesting_img),
+                            ImgConvertor::cvMat2QPixmap(_hand_detector->filtered_img),
+//                            ImgConvertor::cvMat2QPixmap(_hand_detector->extracted_img),
+                            ImgConvertor::cvMat2QPixmap(_sample_collector->resizeSample(_hand_detector->extracted_img)),
+                            ImgConvertor::cvMat2QPixmap(_hand_detector->convexity_img)
                             );
         }
 
@@ -411,7 +406,7 @@ void GestureControlSystem::_samplingCompleted()
 
 void GestureControlSystem::_recognize(const cv::Mat &image, const cv::Point &tracked_point)
 {
-    auto res = _gesture_analyst->analyze(_sample_collector->resizeSample(image), 5);
+    auto res = _gesture_analyst->analyze(image, 5);
 
     _command_inputter->input(res[0].label_id,
             static_cast<float>(tracked_point.x-DEFAULT_ROI_MARGIN_LEFT)/_cursor_roi.width,

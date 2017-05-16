@@ -31,10 +31,9 @@ public:
     /**
      * @brief load loads model file.
      * @param model_file : the path of the model file
-     * @param network_structure : the structure of the CNN defined by string
      * @return the number of labels the classifier defiend
      */
-    int load(const QString &model_file, const QString &network_structure);
+    int load(const QString &model_file);
     /**
      * @brief analyze recognizes gestures from the given image.
      * @param img : a sample image containing hand/gesture

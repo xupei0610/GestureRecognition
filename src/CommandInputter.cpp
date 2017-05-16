@@ -71,9 +71,7 @@ bool CommandInputter::load(const QString &keymap_file)
 
     auto mouses = _keymap_settings->value("mouse-actions").toString().split(SETTING_STRING_DELIMITER);
     for (const auto &s : mouses)
-    {
-        _mouse_map.push_back(s.toInt());
-    }
+        _mouse_map.push_back(s.isEmpty()? -1 : s.toInt());
 
     _action_frame_count[MOUSE_LEFT_CLICK] = 0;
     _action_frame_count[MOUSE_RIGHT_CLICK] = 0;
@@ -99,10 +97,10 @@ void CommandInputter::input(const int &label_index,
 #endif
     auto cursor_pos = estimateCursorPos(tracked_pos_x*screen_width, tracked_pos_y*screen_height);
     int indx = _mouse_map.indexOf(label_index);
-
     if (indx > -1)
         makeMouseAction(static_cast<MOUSE_KEYBOARD_ACTION>(indx^0xFF), cursor_pos);
-    else makeKeyboardAction(label_index);
+    else
+        makeKeyboardAction(label_index);
 }
 
 const QStringList CommandInputter::labels()
@@ -129,17 +127,11 @@ void CommandInputter::makeMouseAction(const MOUSE_KEYBOARD_ACTION &action, const
          {
              mouseRelease();
              if (action == MOUSE_LEFT_CLICK)
-             {
                  _mouseLeftClick(cursor_pos.x, cursor_pos.y);
-             }
              else if (action == MOUSE_RIGHT_CLICK)
-             {
                  _mouseRightClick(cursor_pos.x, cursor_pos.y);
-             }
              else if (action == MOUSE_DOUBLE_LEFT_CLICK)
-             {
                  _mouseDoubleClick(cursor_pos.x, cursor_pos.y);
-             }
              return;
          }
      }

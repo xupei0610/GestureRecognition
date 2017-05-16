@@ -6,7 +6,7 @@ GestureAnalyst::GestureAnalyst()
     caffe::Caffe::set_mode(caffe::Caffe::CAFFE_WORK_MODE);
 }
 
-int GestureAnalyst::load(const QString &model_file, const QString &network_structure)
+int GestureAnalyst::load(const QString &model_file)
 {
     caffe::NetParameter param;
 
@@ -20,7 +20,7 @@ int GestureAnalyst::load(const QString &model_file, const QString &network_struc
     int fd = a->handle();
 
     google::protobuf::io::FileInputStream* input = new google::protobuf::io::FileInputStream(fd);
-    bool success = google::protobuf::TextFormat::Parse(input, &param);
+    google::protobuf::TextFormat::Parse(input, &param);
 
 //    caffe::ReadProtoFromTextFile(param_file, &param);
 
