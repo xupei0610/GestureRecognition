@@ -64,7 +64,7 @@ void MainView::_setupUi()
     _ui_btn_setting->setFocusPolicy(Qt::NoFocus);
 
     _ui_status_bar = new QLabel;
-    _ui_status_bar->setContentsMargins(5, 10, 0, 0);
+    _ui_status_bar->setContentsMargins(5, 0, 0, 0);
     QFont font;
     if (font.pixelSize() < 0)
     {
@@ -76,9 +76,13 @@ void MainView::_setupUi()
     _ui_status_bar->setFont(font);
     _ui_status_bar->setText("Work Status: idle");
 
+    QLabel *title = new QLabel(tr("Gesture Control System"));
+    title->setAlignment(Qt::AlignCenter);
+    title->setContentsMargins(0, 0, 0, 5);
     QVBoxLayout *main_layout = new QVBoxLayout;
     main_layout->setContentsMargins(10, 10, 10, 10);
-    main_layout->setSpacing(0);
+    main_layout->setSpacing(10);
+    main_layout->addWidget(title);
     main_layout->addWidget(_ui_btn_controlling);
     main_layout->addWidget(_ui_btn_sampling);
     main_layout->addWidget(_ui_btn_setting);
@@ -88,7 +92,10 @@ void MainView::_setupUi()
     setFixedSize(minimumSize());
 
     changeWorkStatusToNothing();
-    setWindowTitle(tr("Gesture Control System") + " -- " + tr("MTAGA"));
+    setWindowTitle(tr("Gesture Control System") + " -- " + tr("PeiXu"));
+    this->setVisible(false);
+    this->show();
+    setFixedWidth(width()*1.5);
 }
 
 void MainView::_makeConnections()

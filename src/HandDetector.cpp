@@ -107,7 +107,7 @@ void HandDetector::_imagePreprocessing()
     if (_morphology)
     {
         cv::morphologyEx(_filtered_img, _filtered_img, cv::MORPH_OPEN, _morphology_kernel);
-        cv::morphologyEx(_filtered_img, filtered_img, cv::MORPH_CLOSE, _morphology_kernel);
+        cv::morphologyEx(_filtered_img, _filtered_img,cv::MORPH_CLOSE, _morphology_kernel);
     }
 }
 
@@ -121,9 +121,9 @@ bool HandDetector::_fingerExtraction()
     _fingers.clear();
     _tracked_point.x = -1;
     _tracked_point.y = -1;
-    //    _hand_center.x = -1;
-    //    _hand_center.y = -1;
-    //    _palm_radius = 0;
+    _hand_center.x = -1;
+    _hand_center.y = -1;
+    _palm_radius = 0;
 
     // contour extraction
     cv::findContours(_filtered_img, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -235,9 +235,9 @@ bool HandDetector::_fingerExtraction()
     //        });
 
     // estimate hand center via gravity
-//        auto mom = cv::moments(contour, true);
-//        _hand_center.x = mom.m10/mom.m00;
-//        _hand_center.y = mom.m01/mom.m00;
+    //        auto mom = cv::moments(contour, true);
+    //        _hand_center.x = mom.m10/mom.m00;
+    //        _hand_center.y = mom.m01/mom.m00;
 
     // estimate hand center via distance transformation
     cv::Mat _dist_img(_convexity_img.rows, _convexity_img.cols, CV_8UC1);
@@ -263,11 +263,12 @@ bool HandDetector::_fingerExtraction()
         }
         _palm_radius = 1.2*std::sqrt(_palm_radius);
     }
-    int new_height = _hand_center.y-hand_bound.y + 1.5*_palm_radius;
+    int new_height = _hand_center.y-hand_bound.y + 2*_palm_radius;
     if (new_height > 0 && new_height < hand_bound.height)
         hand_bound.height = std::move(new_height);
 
     _filtered_img(hand_bound).copyTo(_extracted_img);
+
 
     cv::drawContours(_convexity_img, contours, indx, HandDetector::COLOR_GRAY, -1);
     for (const auto & p : _fingers)
