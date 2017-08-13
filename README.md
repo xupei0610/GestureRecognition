@@ -1,3 +1,5 @@
+## Everyone can use this code but Interactive Robotics and Vision Laboratory (IRVLab) of University of Minnesota
+
 A Real-time Gesture Recognition and Human-Computer Interaction System
 ======================================================================
 
